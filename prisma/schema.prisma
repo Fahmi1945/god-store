@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// 1. Tabel Kategori (Baru)
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  slug     String    @unique // Contoh: "valorant", "mobile-legends"
+  products Product[]
+}
+
+// 2. Tabel Produk (Diperbarui dengan relasi)
+model Product {
+  id           String   @id @default(uuid())
+  skuCode      String   @unique 
+  name         String
+  priceCost    Int      
+  priceSell    Int      
+  isAvailable  Boolean  @default(true)
+  supplierName String   @default("digiflazz") // Tambahkan ini
+  
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id])
+  
+  createdAt    DateTime @default(now())
+  orders       Order[]
+}
+
+// 3. Tabel Order
+model Order {
+  id             String   @id @default(uuid())
+  targetId       String   
+  productName    String
+  totalPrice     Int
+  paymentStatus  String   @default("PENDING")
+  deliveryStatus String   @default("PENDING")
+  
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  
+  createdAt      DateTime @default(now())
+}
